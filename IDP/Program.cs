@@ -23,6 +23,8 @@ builder.Services.AddIdentityServer()
 		options.ConfigureDbContext = c => c.UseSqlServer(connectionString, sql => sql.MigrationsAssembly(migrationAssembly));
 		options.EnableTokenCleanup = true;
 	})
+	// we can read these users from any database 
+	.AddTestUsers(IdentityUsers.GetUsers())
 	/*.AddInMemoryIdentityResources(new List<IdentityResource>
 	{
 		new IdentityResources.OpenId(),
@@ -31,7 +33,6 @@ builder.Services.AddIdentityServer()
 		new IdentityResources.Profile(),
 		new IdentityResources.Address(),
 	})
-	.AddTestUsers(IdentityUsers.GetUsers())
 	.AddInMemoryApiResources(IdentityApiResource.GetResources())
 	.AddInMemoryClients(Clients.GetClients())
 	.AddInMemoryApiScopes(Clients.GetApiScopesScopes())*/;
