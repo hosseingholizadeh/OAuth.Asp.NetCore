@@ -1,6 +1,5 @@
 using IdentityServer4.Models;
-using System.Security.Claims;
-using static IdentityServer4.IdentityServerConstants;
+using IDP.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,25 +8,6 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddIdentityServer()
 	.AddDeveloperSigningCredential()
-	.AddTestUsers(new List<IdentityServer4.Test.TestUser>
-	{
-		 new IdentityServer4.Test.TestUser
-		 {
-			 Username = "test",
-			 IsActive = true,
-			 Password = "1234",
-			 SubjectId = Guid.NewGuid().ToString(),
-			 ProviderName = "test",
-			 ProviderSubjectId = Guid.NewGuid().ToString(),
-			 Claims = new List<Claim>
-			 {
-				 new Claim(ClaimTypes.Name, "test"),
-				 new Claim(ClaimTypes.Email, "test@gmail.com"),
-				 new Claim(ClaimTypes.MobilePhone, "09015657617"),
-				 new Claim("fullname", "hossein gholizadeh"),
-			 }
-		 }
-	})
 	.AddInMemoryIdentityResources(new List<IdentityResource>
 	{
 		new IdentityResources.OpenId(),
@@ -36,32 +16,10 @@ builder.Services.AddIdentityServer()
 		new IdentityResources.Profile(),
 		new IdentityResources.Address(),
 	})
-	.AddInMemoryApiResources(new List<ApiResource>
-	{
-
-	})
-	.AddInMemoryClients(new List<Client>
-	{
-		new Client{
-			ClientId = "hossein-test-id",	
-			ClientSecrets = new List<Secret>
-			{
-				new Secret("132456".Sha512())
-			},
-			AllowedGrantTypes = GrantTypes.Implicit,
-			RedirectUris = {"https://localhost:7215/sinin-oicd"},
-			PostLogoutRedirectUris = { "https://localhost:7215/signout-callback-oidc" },
-			AllowedScopes = new List<string>
-			{
-				StandardScopes.OpenId,
-				StandardScopes.Email,
-				StandardScopes.Phone,
-				StandardScopes.Profile,
-
-			},
-			RequireConsent = true,
-		}
-	});
+	.AddTestUsers(IdentityUsers.GetUsers())
+	.AddInMemoryApiResources(IdentityApiResource.GetResources())
+	.AddInMemoryClients(Clients.GetClients())
+	.AddInMemoryApiScopes(Clients.GetApiScopesScopes());
 
 var app = builder.Build();
 
