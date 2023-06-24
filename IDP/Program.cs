@@ -1,14 +1,29 @@
 using IdentityServer4.Models;
 using IDP.Configurations;
+using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+var connectionString = builder.Configuration.GetConnectionString("IdentityDB");
+var migrationAssembly = typeof(Program).GetTypeInfo().Assembly.GetName().Name;
+
 builder.Services.AddIdentityServer()
 	.AddDeveloperSigningCredential()
-	.AddInMemoryIdentityResources(new List<IdentityResource>
+	.AddConfigurationStore(options =>
+	{
+		options.ConfigureDbContext = c => c.UseSqlServer(connectionString, sql => sql.MigrationsAssembly(migrationAssembly));
+	})
+	// saves tokens - has espiration
+	.AddOperationalStore(options =>
+	{
+		options.ConfigureDbContext = c => c.UseSqlServer(connectionString, sql => sql.MigrationsAssembly(migrationAssembly));
+		options.EnableTokenCleanup = true;
+	})
+	/*.AddInMemoryIdentityResources(new List<IdentityResource>
 	{
 		new IdentityResources.OpenId(),
 		new IdentityResources.Phone(),
@@ -19,7 +34,7 @@ builder.Services.AddIdentityServer()
 	.AddTestUsers(IdentityUsers.GetUsers())
 	.AddInMemoryApiResources(IdentityApiResource.GetResources())
 	.AddInMemoryClients(Clients.GetClients())
-	.AddInMemoryApiScopes(Clients.GetApiScopesScopes());
+	.AddInMemoryApiScopes(Clients.GetApiScopesScopes())*/;
 
 var app = builder.Build();
 
